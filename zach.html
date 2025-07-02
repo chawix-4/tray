@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>A Book with 7 Pages</title>
+  <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Indie Flower', cursive;
+      background: linear-gradient(to top, #fdfbfb, #fce4ec);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .parcel {
+      position: absolute;
+      width: 200px;
+      height: 150px;
+      background-color: #ffc1e3;
+      border: 3px dashed #ff69b4;
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(255, 182, 193, 0.4);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      cursor: pointer;
+      z-index: 200;
+      transition: transform 0.6s ease, opacity 0.6s ease;
+    }
+
+    .parcel .lid {
+      position: absolute;
+      top: -40px;
+      width: 100%;
+      height: 40px;
+      background-color: #ffb6d9;
+      border-bottom: 3px dashed #ff69b4;
+      border-radius: 10px 10px 0 0;
+      transition: transform 0.6s ease;
+      transform-origin: bottom;
+    }
+
+    .parcel.open .lid {
+      transform: rotateX(120deg);
+    }
+
+    .parcel .open-text {
+      font-family: 'Indie Flower', cursive;
+      color: #fff;
+      font-size: 1rem;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .book-container {
+      width: 60vw;
+      max-width: 500px;
+      height: 65vh;
+      max-height: 520px;
+      perspective: 2000px;
+      position: relative;
+      transition: transform 1s ease;
+      opacity: 0;
+      z-index: 100;
+    }
+
+    .book-container.show-book {
+      opacity: 1;
+    }
+
+    .book {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 1s ease;
+      display: flex;
+      align-items: center;
+    }
+
+    .paper {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      transform-style: preserve-3d;
+      transform-origin: left;
+      transition: transform 1s ease;
+      border-radius: 25px;
+      border: 2px dashed #ffc1e3;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      background-image: url('https://www.transparenttextures.com/patterns/white-wall.png');
+      background-color: #fff5fa;
+      overflow: hidden;
+    }
+
+    .front, .back {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      backface-visibility: hidden;
+      padding: 1.5rem 2rem;
+      border-radius: 25px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      font-size: 1.3rem;
+      text-align: center;
+      background-image:
+        repeating-linear-gradient(
+          to bottom,
+          #fff5fa 0px,
+          #fff5fa 24px,
+          #ffc1e3 25px
+        ),
+        linear-gradient(to right, #ffc1e3 1px, transparent 1px);
+      background-size:
+        100% 25px,
+        3px 100%;
+      background-repeat: repeat-y, no-repeat;
+      background-position: left center;
+    }
+
+    .front.cover {
+      font-size: 1.9rem;
+      background-color: #ffb6d9;
+      color: white;
+      font-weight: bold;
+      justify-content: center;
+      background-image: none;
+    }
+
+    .front.title {
+      font-size: 1.2rem;
+      color: #ff69b4;
+    }
+
+    .front:not(.cover) { background-color: #fff5fa; }
+    .back { background-color: #ffeaf5; transform: rotateY(180deg); }
+    .flipped { transform: rotateY(-180deg); z-index: 0 !important; }
+
+    .paper .page-number {
+      margin-top: auto;
+      font-size: 0.9rem;
+      color: #ff69b4;
+      padding-top: 10px;
+    }
+
+    .paper:nth-child(1) { z-index: 15; }
+    .paper:nth-child(2) { z-index: 14; }
+    .paper:nth-child(3) { z-index: 13; }
+    .paper:nth-child(4) { z-index: 12; }
+    .paper:nth-child(5) { z-index: 11; }
+    .paper:nth-child(6) { z-index: 10; }
+    .paper:nth-child(7) { z-index: 9; }
+    .paper:nth-child(8) { z-index: 8; }
+    .paper:nth-child(9) { z-index: 7; }
+  </style>
+</head>
+<body>
+  <audio id="flipSound" src="https://www.soundjay.com/mechanical/page-turn-7.mp3"></audio>
+
+  <div id="parcel" class="parcel" onclick="openParcel()">
+    <div class="lid"></div>
+    <div class="box"></div>
+    <p class="open-text">Click to open your parcel from Charlene 🎁</p>
+  </div>
+
+  <div class="book-container" id="bookContainer">
+    <div class="book" id="book">
+      <div class="paper">
+        <div class="front cover" onclick="flipPage(this.parentElement)">A Book with 7 Pages</div>
+        <div class="back"></div>
+      </div>
+      <div class="paper" onclick="flipPage(this)">
+        <div class="front title" id="page1Content">
+          <h3 style="margin-bottom: 1rem;">July 7, 2025</h3>
+          <div id="typeIntro" style="font-size: 1rem; color: #444; text-align: left; max-height: 100%; overflow-y: auto;"></div>
+        </div>
+        <div class="back"></div>
+      </div>
+     <div class="paper" onclick="flipPage(this)">
+  <div class="front title">
+    <div style="margin-bottom: 1rem;"><strong>Where did it all began</strong></div>
+    <div style="font-size: 1rem; color: #444; text-align: left; max-height: 100%; overflow-y: auto;">
+      <div style="text-align: center;">
+        <img src="convo.png" alt="First Conversation" style="width: 70%; max-width: 300px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 1rem;" />
+      </div>
+      <strong><br>April 23, 2025 — 10:41 PM</strong><br><br>
+      Kay ni-message ka sa akoa ani, nya random kaayo ayyy. Pero dili man stranger ang tan-aw nako sa imoha kay sige man ka g comment sa akong mga shared posts gud, no? Tas usahay sa akong mga post, mo-react or mo-reply ka sa MyDay... so dili jud ka totally stranger para sa akoa. 
+      <br><br>
+      Pero kana jud nga day, mao jud to ang time nga nagka-tarong tag conversation. Kay sauna, di bitaw ko ga-reply sa imoha, no? HAHAHA sorry kaayo, di man gud ko kabalo mu-hold og conversation. Awkward girl here HAHAHAHA.
+      <br><br>
+      Nya isa pud sa reason nga nisugot ko... kay gwapo man gud ka. HAHHABHABHSABSH SERYOSO KO, ZACH. Pogi jud ka, mao na maulaw ko mutan-aw sa imoha. Naulaw jud ko ato nga time nga nagkita ta.
+      <br><br>
+      Pero thankful kaayo ko nga ni-message ka that time. Kay kung wala pa to, I wouldn’t have experienced this kind of happiness and love. Salamat jud, Zach. 💖
+    </div>
+  </div>
+  <div class="back"></div>
+</div>
+
+   <div class="paper" onclick="flipPage(this)">
+  <div class="front title" style="padding: 1rem 1.5rem;">
+    <div style="display: flex; align-items: flex-start; gap: 1.5rem; width: 100%; flex-wrap: nowrap;">
+
+      <!-- IMAGE ON LEFT -->
+      <div style="width: 250px; flex-shrink: 0; margin-top: 40px;">
+        <img src="firstdate.png" alt="First Date" 
+             style="width: 100%; height: 300px; object-fit: cover;" />
+      </div>
+
+      <!-- TEXT ON RIGHT -->
+      <div style="flex: 1; font-size: 1rem; color: #444; text-align: left;">
+        <strong style="color: #ff69b4;">3. First Date 🥰</strong><br><br>
+        Our first date was simple, but to me it felt magical. I still remember how kilig I was the entire time. You looked so handsome, Zach, and I couldn’t stop smiling. Thank you for treating me so gently, like a princess. 💖<br><br>
+        That day is stuck in my heart forever.
+      </div>
+
+    </div>
+  </div>
+  <div class="back"></div>
+</div>
+
+
+    <div class="paper" onclick="flipPage(this)">
+  <div class="front title" style="padding: 1.5rem;">
+    <!-- IMAGE ON TOP -->
+    <div style="text-align: center; margin-bottom: 1rem;">
+      <img src="courted.png" alt="The Day You Courted Me" style="width: 95%; max-width: 500px;" />
+    </div>
+
+    <!-- TEXT BELOW -->
+    <div style="font-size: 1rem; color: #444; text-align: left;">
+      <strong style="color: #ff69b4;">4. The Day You Courted Me 🌸</strong><br><br>
+      I still remember that moment clearly. You looked so sincere, so sweet. Murag naa jud koy butterflies sa tiyan, and my heart was pounding fast. That was the day I realized nga seryoso ka, and that made me feel so special. 🥺💗
+    </div>
+  </div>
+  <div class="back"></div>
+</div>
+
+
+
+   <div class="paper" onclick="flipPage(this)">
+  <div class="front title" style="padding: 1.5rem;">
+    <div style="display: flex; align-items: center; gap: 1.5rem; justify-content: space-between; flex-wrap: nowrap;">
+
+      <!-- TEXT ON THE LEFT -->
+      <div style="flex: 1; font-size: 1rem; color: #444; text-align: left;">
+        <strong style="color: #ff69b4;">5. Our Dates Together 🎡</strong><br><br>
+        Every moment we spent together felt like a dream. From simple walks to little food trips — mura siyag slow-motion sa akong utok. I treasure those times, kay with you, even the simplest things become magical. 💘
+      </div>
+
+      <!-- IMAGE ON THE RIGHT -->
+      <div style="width: 250px; flex-shrink: 0; margin-top: 40px;">
+        <img src="dates.png" alt="Our Dates Together" 
+             style="width: 100%; height: 300px; object-fit: cover;" />
+      </div>
+
+    </div>
+  </div>
+  <div class="back"></div>
+</div>
+
+
+
+
+
+      <div class="paper" onclick="flipPage(this)">
+        <div class="front title">6. Songs That Remind Me of You 🎶</div>
+        <div class="back"></div>
+      </div>
+      <div class="paper" onclick="flipPage(this)">
+        <div class="front title">7. The Letter with My Yes 💖</div>
+        <div class="back"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const flipSound = document.getElementById('flipSound');
+
+    function flipPage(el) {
+      el.classList.toggle('flipped');
+      flipSound.currentTime = 0;
+      flipSound.play();
+    }
+
+    function openParcel() {
+      const parcel = document.getElementById('parcel');
+      const book = document.getElementById('bookContainer');
+      parcel.classList.add('open');
+      setTimeout(() => {
+        book.classList.add('show-book');
+        parcel.style.opacity = '0';
+        parcel.style.pointerEvents = 'none';
+        setTimeout(typeWriterPage1, 800);
+      }, 1000);
+    }
+
+    const page1Text = `I made this mini book system just for you. Wala pa jud ko kabuhat ani para sa lain—ikaw ra gyud ang naka-inspire nako to do this. I wanted it to be something special, kay special man sad ka para nako. Zach, I’m really, really grateful for you.
+
+This is my way of showing how much you mean to me. Basi di ka kabantay, pero you’ve made such a big difference in my life. You make me feel appreciated and happy in a way that’s hard to explain.
+
+Gipili gyud nako ning adlawa to send this. Yes, I’ve been preparing it for one whole month. I know dili ni perfect or super fancy, pero I gave it my all. Gikan gyud ni sa heart, kay gusto gyud nako ipakita kung unsa tika ka-appreciate.
+
+And about July 7… it’s not just a random date. There's a reason behind it, and you’ll find out as you read through the pages. Hehehe.`;
+
+    let j = 0;
+    function typeWriterPage1() {
+      if (j < page1Text.length) {
+        document.getElementById("typeIntro").innerHTML += page1Text.charAt(j);
+        j++;
+        setTimeout(typeWriterPage1, 35);
+      }
+    }
+  </script>
+</body>
+</html>
